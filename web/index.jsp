@@ -1,3 +1,16 @@
+<%-- 
+    Document   : index
+    Created on : 05/08/2021, 22:17:21
+    Author     : buckl
+--%>
+
+<%@page import="model.UsuariosDAO"%>
+<%@page import="model.AdministradoresDAO"%>
+<%/*
+
+*/%>
+<%@page import="aplicacao.Usuario"%>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
 

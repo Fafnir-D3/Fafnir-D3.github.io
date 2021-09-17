@@ -39,6 +39,71 @@
             <a href="FazLogoff" class="btn btn-primary">Sair</a>
         </div>
         
+        <div class="container" style="margin-top: 40px">
+            <div class="row text-center"><h1>Exemplos Parte Privada</h1>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px;">
+                <img class="card-img-top" src="img/printcadastro.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Depois de logado, o usuário é redirecionado para a página de Cadastro.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px;">
+                <img class="card-img-top" src="img/printcontas.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Na página de contas é possível cadastrar, e verificar as contas, também é lançado um aviso caso a conta esteja em negativo.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px;">
+                <img class="card-img-top" src="img/printlancamentos.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Na página de lançamentos é possível ver todos os lançamentos feitos, editar, ou criar novos.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px;">
+                <img class="card-img-top" src="img/printbalancete.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Depois de escolher uma conta e um mês, na página Balancete é mostrado o saldo final do mês e um aviso caso esteja em negativo.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px; margin-top: 20px;">
+                <img class="card-img-top" src="img/printcategorias.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Na página Categorias é possível ver todas as categorias de lançamentos.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px; margin-top: 20px;">
+                <img class="card-img-top" src="img/printadministrador.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Apenas os Administradores tem acesso a essa página, aqui podem podem listar, excluir ou criar novos administradores.</p>
+                </div>
+            </div>
+            <div class="card" style="width: 18rem; margin-right: 20px; margin-left: 20px; margin-top: 20px;">
+                <img class="card-img-top" src="img/printusuarios.png" alt="Card image cap">
+                <div class="card-body">
+                     <p class="card-text">Apenas os Administradores tem acesso a página Usuários, aqui listar, excluir ou criar novos Usuários.</p>
+                </div>
+            </div>
+        </div>
+            
+        <!– Usado para ampliar as imagens–>
+        <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                  <h4 class="modal-title" id="myModalLabel">Image preview</h4>
+                </div>
+                <div class="modal-body">
+                  <img src="" id="imagepreview" style="width: 400px; height: 264px;" >
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+        </div>
+
+            
         
         </div>
         <script src="js/jquery-3.4.1.min.js"></script>
@@ -49,6 +114,13 @@
             $('.senha').mask('000');
         });
     </script>
-        
+    
+    <script type="text/javascript">
+        $("#pop").on("click", function() {
+            $('#imagepreview').attr('src', $('#imageresource').attr('src')); // here asign the image to the modal when the user click the enlarge link
+            $('#imagemodal').modal('show'); // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
+        });
+    </script>
+    
     </body>
 </html>

@@ -13,7 +13,7 @@ representar os débitos, de forma que os negativos podem exceder 100%.
 <%@page import="java.text.DecimalFormat"%>
 <%@page import="java.text.DecimalFormatSymbols"%>
 <%@page import="java.util.Locale"%>
-<%@page import="aplicacao.Lancamento"%>
+<%@page import="model.Lancamento"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

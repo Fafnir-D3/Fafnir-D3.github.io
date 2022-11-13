@@ -1,4 +1,4 @@
-package aplicacao;
+package model;
 
 /* Ideia:
     Uso a classe usuario para representar tanto os usuarios como os administradores,

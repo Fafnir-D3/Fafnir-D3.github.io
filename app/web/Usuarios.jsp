@@ -2,7 +2,7 @@
 <%/*
 Mostra todos os Usuarios cadastrados e permite cadastrar novos usuarios
 */%>
-<%@page import="aplicacao.Usuario"%>
+<%@page import="model.Usuario"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

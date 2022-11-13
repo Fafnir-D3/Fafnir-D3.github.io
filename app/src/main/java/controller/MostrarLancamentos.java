@@ -1,7 +1,6 @@
 package controller;
 
-import aplicacao.Lancamento;
-import aplicacao.Usuario;
+import dao.LancamentosDAO;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
@@ -11,7 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.LancamentosDAO;
+import model.Lancamento;
+import model.Usuario;
 
 /*  Ideia:
     Tambem atende admin e usuarios, mas no caso de usuarios é possível pedir os

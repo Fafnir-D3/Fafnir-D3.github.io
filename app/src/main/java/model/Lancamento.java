@@ -1,4 +1,4 @@
-package aplicacao;
+package model;
 
 /* Ideia:
     Tentei deixar o lancamento intuitivo tanto para o usuario quanto para o programador

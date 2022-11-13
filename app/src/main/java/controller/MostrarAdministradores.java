@@ -1,6 +1,6 @@
 package controller;
 
-import aplicacao.Usuario;
+import dao.AdministradoresDAO;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.AdministradoresDAO;
+import model.Usuario;
 
 @WebServlet(
     name = "MostrarAdministradores",

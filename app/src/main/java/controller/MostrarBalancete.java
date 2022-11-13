@@ -1,7 +1,7 @@
 package controller;
 
-import aplicacao.Lancamento;
-import aplicacao.Usuario;
+import dao.ContasDAO;
+import dao.LancamentosDAO;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.ContasDAO;
-import model.LancamentosDAO;
+import model.Lancamento;
+import model.Usuario;
 
 @WebServlet(
     name = "MostrarBalancete",

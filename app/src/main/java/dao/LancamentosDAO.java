@@ -1,6 +1,5 @@
-package model;
+package dao;
 
-import aplicacao.Lancamento;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Lancamento;
 
 /*  Ideia:
     Optei por usar o nome da conta e o nome da categoria invez dos respectivos IDs

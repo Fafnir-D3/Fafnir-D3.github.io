@@ -3,7 +3,7 @@
     Mostra todos os administradores cadastrados no BD, permite excluir, editar e
 inserir administradores.
 */%>
-<%@page import="aplicacao.Usuario"%>
+<%@page import="model.Usuario"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

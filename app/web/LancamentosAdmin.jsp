@@ -7,7 +7,7 @@
 <%/*
 Mostra todos os Lancamentos cadastrados no BD
 */%>
-<%@page import="aplicacao.Lancamento"%>
+<%@page import="model.Lancamento"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

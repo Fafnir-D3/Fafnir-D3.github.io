@@ -4,12 +4,12 @@
     Author     : buckl
 --%>
 
-<%@page import="model.UsuariosDAO"%>
-<%@page import="model.AdministradoresDAO"%>
+<%@page import="dao.UsuariosDAO"%>
+<%@page import="dao.AdministradoresDAO"%>
 <%/*
 
 */%>
-<%@page import="aplicacao.Usuario"%>
+<%@page import="model.Usuario"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>

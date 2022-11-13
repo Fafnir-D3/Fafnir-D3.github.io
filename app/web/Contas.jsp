@@ -9,7 +9,7 @@
 contas. Além disso gera links para cada conta que mostram todos os lançamentos 
 apenas daquela conta.
 */%>
-<%@page import="aplicacao.Conta"%>
+<%@page import="model.Conta"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

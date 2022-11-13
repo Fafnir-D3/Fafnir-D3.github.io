@@ -16,7 +16,7 @@ editar, excluir e inserir lançamentos.
 <%@page import="java.text.DecimalFormatSymbols"%>
 <%@page import="java.text.DecimalFormat"%>
 <%@page import="java.util.Formatter"%>
-<%@page import="aplicacao.Lancamento"%>
+<%@page import="model.Lancamento"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.lang.Math"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

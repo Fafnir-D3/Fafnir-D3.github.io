@@ -7,7 +7,7 @@
 <%/*
 Mostra os dados do usuario logado
 */%>
-<%@page import="aplicacao.Usuario"%>
+<%@page import="model.Usuario"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

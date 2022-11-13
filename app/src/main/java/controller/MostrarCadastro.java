@@ -1,6 +1,6 @@
 package controller;
 
-import aplicacao.Usuario;
+import dao.UsuariosDAO;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.UsuariosDAO;
+import model.Usuario;
 
 /*  Ideia:
     MostrarCadastro é usada para 2 situações, redirecionar para a pagina Usuarios.jsp

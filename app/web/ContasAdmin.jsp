@@ -7,7 +7,7 @@
 <%/*
     Mostra todas as contas de todos os usuarios cadastrados no BD
 */%>
-<%@page import="aplicacao.Conta"%>
+<%@page import="model.Conta"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>

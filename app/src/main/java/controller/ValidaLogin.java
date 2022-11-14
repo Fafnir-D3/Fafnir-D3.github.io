@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import model.Usuario;
 
 /*  Ideia:
-   Usa session para guardar o usuario logado, a sessão dura 5minutos fora do browser
+   Usa session para guardar o usuario logado, a sessão dura 5 min
 */
 @AllArgsConstructor
 @WebServlet(
@@ -33,18 +33,18 @@ public class ValidaLogin extends HttpServlet {
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
-    request.setCharacterEncoding("UTF-8");
     String cpf = request.getParameter("cpf");
     String senha = request.getParameter("senha");
     HttpSession session = request.getSession();
-    if (usuariosDAO.valida(cpf, senha)) { // checa se é usuario comum
-      Usuario aux = (Usuario) usuariosDAO.getUsuario(cpf);
-      if (aux.getSuspenso().equals("N")) { // checa se o usuario esta suspenso ( N = não suspenso)
+    if (usuariosDAO.valida(cpf, senha)) { // checa se eh usuario comum
+      Usuario aux = usuariosDAO.getUsuario(cpf);
+      if (aux.getSuspenso().equals("N")) { // checa se o usuario esta suspenso ( N = nao suspenso)
         session.setAttribute("usuario", aux);
         response.sendRedirect("MostrarCadastro");
       }
-    } else if (adminDAO.valida(cpf, senha)) { // checa se e administrador
-      Usuario aux = (Usuario) adminDAO.getAdmin(cpf);
+      response.sendRedirect("Erro.jsp");
+    } else if (adminDAO.valida(cpf, senha)) { // checa se eh administrador
+      Usuario aux = adminDAO.getAdmin(cpf);
       session.setAttribute("usuario", aux);
       response.sendRedirect("MostrarCadastro");
     } else {

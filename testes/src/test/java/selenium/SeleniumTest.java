@@ -2,6 +2,7 @@ package selenium;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,7 +18,16 @@ public class SeleniumTest {
   public static void configureDriver() {
     String rootPath = System.getProperty("user.dir");
     System.setProperty(
-        "webdriver.gecko.driver", rootPath + "\\src\\test\\resources\\geckodriver.exe");
+        "webdriver.gecko.driver",
+        rootPath
+            + File.separator
+            + "src"
+            + File.separator
+            + "test"
+            + File.separator
+            + "resources"
+            + File.separator
+            + "geckodriver.exe");
   }
 
   @Before

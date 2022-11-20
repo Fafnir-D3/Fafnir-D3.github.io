@@ -29,7 +29,7 @@ public class MostrarContas extends HttpServlet {
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         String link;
-        ArrayList<Conta> aux = new ArrayList<>();
+        ArrayList<Conta> aux;
         if (usuario.getSuspenso().equals("A")) { // admin
           aux = DAO.getLista();
           link = "ContasAdmin.jsp";

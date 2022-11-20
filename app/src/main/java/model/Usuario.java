@@ -1,5 +1,6 @@
 package model;
 
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,16 +15,11 @@ os administradores dos usuarios comuns.
 @Setter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class Usuario {
+public class Usuario implements Serializable {
 
   private int id;
   private String nome;
   private String cpf;
   private String senha;
   private String suspenso; // S = suspenso , N = nao suspenso, A = administrador
-
-  // facilita para saber se esta suspenso
-  public boolean isSuspenso() {
-    return (suspenso.equals("S"));
-  }
 }

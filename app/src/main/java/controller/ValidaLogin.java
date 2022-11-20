@@ -21,8 +21,10 @@ import model.Usuario;
     urlPatterns = {"/ValidaLogin"})
 public class ValidaLogin extends HttpServlet {
 
-  UsuariosDAO usuariosDAO;
-  AdministradoresDAO adminDAO;
+  // spotbugs serializable
+  private static final long serialVersionUID = 23L;
+  private transient UsuariosDAO usuariosDAO;
+  private transient AdministradoresDAO adminDAO;
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response)

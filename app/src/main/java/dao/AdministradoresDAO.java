@@ -1,9 +1,9 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,74 +16,65 @@ public class AdministradoresDAO {
   public AdministradoresDAO() {
     try {
       conexao = Conexao.criaConexao();
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
     }
   }
 
   // retorna todos os admins do BD
   public ArrayList<Usuario> getLista() {
-
     ArrayList<Usuario> retorno = new ArrayList<>();
-
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs = stmt.executeQuery("select * from administradores;");
-
+    try (PreparedStatement preparedStatement =
+            conexao.prepareStatement("select * from administradores;");
+        ResultSet rs = preparedStatement.executeQuery(); ) {
       while (rs.next()) {
-        Usuario aux =
+        retorno.add(
             new Usuario(
                 rs.getInt("id"),
                 rs.getString("nome"),
                 rs.getString("cpf"),
                 rs.getString("senha"),
-                "A");
-        retorno.add(aux);
+                "A"));
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
     }
-
     return retorno;
   }
 
   // retorna o admin com o cpf dado
   public Usuario getAdmin(String cpf) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs = stmt.executeQuery("select * from administradores where cpf='" + cpf + "';");
-      if (rs.next()) {
-        Usuario aux =
-            new Usuario(
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("select * from administradores where cpf=?;")) {
+      preparedStatement.setString(1, cpf);
+      try (ResultSet rs = preparedStatement.executeQuery()) {
+        return rs.next()
+            ? new Usuario(
                 rs.getInt("id"),
                 rs.getString("nome"),
                 rs.getString("cpf"),
                 rs.getString("senha"),
-                "A");
-        return aux;
-      } else {
-        return null;
+                "A")
+            : null;
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, e);
     }
-
     return null;
   }
 
   // checa se o cpf e senha dados batem com um admin cadastrado no sistema
   public boolean valida(String cpf, String senha) {
-    Statement stmt;
-    try {
-      stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery("select cpf, senha from administradores where cpf='" + cpf + "';");
-      if (rs.next()) {
-        if (cpf.equals(rs.getString("cpf")) && senha.equals(rs.getString("senha"))) return true;
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("select cpf, senha from administradores where cpf=?;"); ) {
+      preparedStatement.setString(1, cpf);
+      try (ResultSet rs = preparedStatement.executeQuery()) {
+        if (rs.next()) {
+          if (cpf.equals(rs.getString("cpf")) && senha.equals(rs.getString("senha"))) return true;
+        }
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, e);
     }
 
     return false;
@@ -91,13 +82,12 @@ public class AdministradoresDAO {
 
   // exclui o admin de cpf dado
   public boolean exclui(String cpf) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      stmt.executeUpdate("delete from administradores where id='" + getAdmin(cpf).getId() + "';");
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("delete from administradores where id=?;")) {
+      preparedStatement.executeUpdate();
       return true;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
     }
     return false;
   }
@@ -105,22 +95,17 @@ public class AdministradoresDAO {
   // insere um novo admin no sistema. Ele é tratado como classe Usuario na função,
   // porem no SQL é tratado como admin
   public boolean insere(Usuario usuario) {
-
-    try {
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("insert into administradores (nome,cpf,senha) values (?,?,?);")) {
       if (getAdmin(usuario.getCpf()) == null) { // checa se o cpf do admin ja existe
-        Statement stmt = conexao.createStatement();
-        stmt.executeUpdate(
-            "insert into administradores (nome,cpf,senha)values ('"
-                + usuario.getNome()
-                + "','"
-                + usuario.getCpf()
-                + "','"
-                + usuario.getSenha()
-                + "');");
+        preparedStatement.setString(1, usuario.getNome());
+        preparedStatement.setString(2, usuario.getCpf());
+        preparedStatement.setString(3, usuario.getSenha());
+        preparedStatement.executeUpdate();
         return true;
       } else return false;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
     }
     return false;
   }
@@ -128,24 +113,18 @@ public class AdministradoresDAO {
   // edita os dados de um admin no sistema. Ele é tratado como classe Usuario
   // na função, porem no SQL é tratado como admin
   public boolean edita(Usuario usuario, int id) {
-
-    try {
-      Statement stmt = conexao.createStatement();
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("update administradores set nome=?,cpf=?,senha=? where id=?;")) {
       if (usuario.getSuspenso().equals("A")) { // checa se é admin
-        stmt.executeUpdate(
-            "update administradores set nome='"
-                + usuario.getNome()
-                + "',cpf='"
-                + usuario.getCpf()
-                + "',senha='"
-                + usuario.getSenha()
-                + "' where id='"
-                + id
-                + "';");
+        preparedStatement.setString(1, usuario.getNome());
+        preparedStatement.setString(2, usuario.getCpf());
+        preparedStatement.setString(3, usuario.getSenha());
+        preparedStatement.setInt(4, id);
+        preparedStatement.executeUpdate();
         return true;
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
     }
     return false;
   }

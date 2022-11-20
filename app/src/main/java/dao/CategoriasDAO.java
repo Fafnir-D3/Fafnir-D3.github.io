@@ -37,7 +37,6 @@ public class CategoriasDAO {
     } catch (SQLException ex) {
       Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
     }
-
     return 0;
   }
 

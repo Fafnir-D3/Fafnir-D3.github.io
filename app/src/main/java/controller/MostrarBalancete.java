@@ -3,7 +3,6 @@ package controller;
 import dao.ContasDAO;
 import dao.LancamentosDAO;
 import java.io.IOException;
-import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import model.Lancamento;
 import model.Usuario;
 
 @WebServlet(
@@ -30,7 +28,6 @@ public class MostrarBalancete extends HttpServlet {
       throws ServletException, IOException {
     request.setCharacterEncoding("UTF-8");
     LancamentosDAO DAO = new LancamentosDAO();
-    ArrayList<Lancamento> aux = new ArrayList<>();
     int id;
     String data;
     HttpSession session = request.getSession();
@@ -42,8 +39,7 @@ public class MostrarBalancete extends HttpServlet {
         ContasDAO cDAO = new ContasDAO();
         id = cDAO.idPorNome((String) request.getParameter("conta"));
         data = (String) request.getParameter("data");
-        aux = DAO.getBalancete(usuario.getCpf(), id, data);
-        request.setAttribute("lancamentos", aux);
+        request.setAttribute("lancamentos", DAO.getBalancete(usuario.getCpf(), id, data));
         RequestDispatcher rd = request.getRequestDispatcher("BalanceteMes.jsp");
         rd.forward(request, response);
       } else {

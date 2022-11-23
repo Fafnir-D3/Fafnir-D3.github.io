@@ -1,12 +1,11 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import lombok.extern.slf4j.Slf4j;
 import model.Lancamento;
 
 /*  Ideia:
@@ -14,16 +13,31 @@ import model.Lancamento;
 para ser mais intuitivo para o usuario e pro programador. Por isso preciso acessar
 algumas tabelas extras ao lidar com lançamentos.
 */
+@Slf4j
 public class LancamentosDAO {
 
   private Connection conexao;
+  ContasDAO contasDAO;
+  CategoriasDAO categoriasDAO;
 
   public LancamentosDAO() {
     try {
       conexao = Conexao.criaConexao();
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception e) {
+      log.error(e.getMessage());
     }
+    contasDAO = new ContasDAO();
+    categoriasDAO = new CategoriasDAO();
+  }
+
+  public LancamentosDAO(ContasDAO contasDAO, CategoriasDAO categoriasDAO) {
+    try {
+      conexao = Conexao.criaConexao();
+    } catch (Exception e) {
+      log.error(e.getMessage());
+    }
+    this.contasDAO = contasDAO;
+    this.categoriasDAO = categoriasDAO;
   }
 
   // retorna todos os lançamentos cadastrados no BD.
@@ -31,33 +45,28 @@ public class LancamentosDAO {
 
     ArrayList<Lancamento> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery(
-              "select lancamentos.id,contas.nome_conta,categorias.descricao as categorias, valor, operacao, lancamentos.data, lancamentos.descricao from lancamentos\n"
-                  + "inner join contas\n"
-                  + "on lancamentos.id_conta=contas.id\n"
-                  + "inner join categorias\n"
-                  + "on lancamentos.id_categoria=categorias.id\n"
-                  + "order by contas.nome_conta;");
-
-      while (rs.next()) {
-        Lancamento aux =
+    try (PreparedStatement preparedStatement =
+            conexao.prepareStatement(
+                "select lancamentos.id,contas.nome_conta,categorias.descricao as categorias, "
+                    + "valor, operacao, lancamentos.data, lancamentos.descricao from lancamentos "
+                    + "inner join contas on lancamentos.id_conta=contas.id "
+                    + "inner join categorias on lancamentos.id_categoria=categorias.id "
+                    + "order by contas.nome_conta;");
+        ResultSet resultSet = preparedStatement.executeQuery()) {
+      while (resultSet.next()) {
+        retorno.add(
             new Lancamento(
-                rs.getInt("id"),
-                rs.getString("nome_conta"),
-                rs.getString("categorias"),
-                rs.getDouble("valor"),
-                rs.getString("operacao"),
-                rs.getString("data"),
-                rs.getString("descricao"));
-        retorno.add(aux);
+                resultSet.getInt("id"),
+                resultSet.getString("nome_conta"),
+                resultSet.getString("categorias"),
+                resultSet.getDouble("valor"),
+                resultSet.getString("operacao"),
+                resultSet.getString("data"),
+                resultSet.getString("descricao")));
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return retorno;
   }
 
@@ -66,37 +75,31 @@ public class LancamentosDAO {
 
     ArrayList<Lancamento> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery(
-              "select lancamentos.id,contas.nome_conta,categorias.descricao as categorias, valor, operacao, lancamentos.data, lancamentos.descricao from lancamentos\n"
-                  + "inner join contas\n"
-                  + "on lancamentos.id_conta=contas.id\n"
-                  + "inner join categorias\n"
-                  + "on lancamentos.id_categoria=categorias.id\n"
-                  + "inner join usuarios\n"
-                  + "on contas.id_usuario=usuarios.id\n"
-                  + "where usuarios.cpf='"
-                  + cpf
-                  + "';");
-
-      while (rs.next()) {
-        Lancamento aux =
-            new Lancamento(
-                rs.getInt("id"),
-                rs.getString("nome_conta"),
-                rs.getString("categorias"),
-                rs.getDouble("valor"),
-                rs.getString("operacao"),
-                rs.getString("data"),
-                rs.getString("descricao"));
-        retorno.add(aux);
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "select lancamentos.id,contas.nome_conta,categorias.descricao as categorias, "
+                + "valor, operacao, lancamentos.data, lancamentos.descricao from lancamentos "
+                + "inner join contas on lancamentos.id_conta=contas.id "
+                + "inner join categorias on lancamentos.id_categoria=categorias.id "
+                + "inner join usuarios on contas.id_usuario=usuarios.id "
+                + "where usuarios.cpf=?;")) {
+      preparedStatement.setString(1, cpf);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        while (resultSet.next()) {
+          retorno.add(
+              new Lancamento(
+                  resultSet.getInt("id"),
+                  resultSet.getString("nome_conta"),
+                  resultSet.getString("categorias"),
+                  resultSet.getDouble("valor"),
+                  resultSet.getString("operacao"),
+                  resultSet.getString("data"),
+                  resultSet.getString("descricao")));
+        }
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return retorno;
   }
 
@@ -105,37 +108,31 @@ public class LancamentosDAO {
 
     ArrayList<Lancamento> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery(
-              "select lancamentos.id,contas.nome_conta,categorias.descricao as categorias, valor, operacao, lancamentos.data, lancamentos.descricao from lancamentos\n"
-                  + "inner join contas\n"
-                  + "on lancamentos.id_conta=contas.id\n"
-                  + "inner join categorias\n"
-                  + "on lancamentos.id_categoria=categorias.id\n"
-                  + "inner join usuarios\n"
-                  + "on contas.id_usuario=usuarios.id\n"
-                  + "where usuarios.cpf='"
-                  + cpf
-                  + "' AND lancamentos.id_conta="
-                  + conta
-                  + ";");
-
-      while (rs.next()) {
-        Lancamento aux =
-            new Lancamento(
-                rs.getInt("id"),
-                rs.getString("nome_conta"),
-                rs.getString("categorias"),
-                rs.getDouble("valor"),
-                rs.getString("operacao"),
-                rs.getString("data"),
-                rs.getString("descricao"));
-        retorno.add(aux);
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "select lancamentos.id,contas.nome_conta,categorias.descricao as categorias, "
+                + "valor, operacao, lancamentos.data, lancamentos.descricao from lancamentos "
+                + "inner join contas on lancamentos.id_conta=contas.id "
+                + "inner join categorias on lancamentos.id_categoria=categorias.id "
+                + "inner join usuarios on contas.id_usuario=usuarios.id "
+                + "where usuarios.cpf=? AND lancamentos.id_conta=?;")) {
+      preparedStatement.setString(1, cpf);
+      preparedStatement.setInt(2, conta);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        while (resultSet.next()) {
+          retorno.add(
+              new Lancamento(
+                  resultSet.getInt("id"),
+                  resultSet.getString("nome_conta"),
+                  resultSet.getString("categorias"),
+                  resultSet.getDouble("valor"),
+                  resultSet.getString("operacao"),
+                  resultSet.getString("data"),
+                  resultSet.getString("descricao")));
+        }
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return retorno;
   }
@@ -145,38 +142,31 @@ public class LancamentosDAO {
 
     ArrayList<Lancamento> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery(
-              "select lancamentos.id,categorias.descricao as categorias, sum(valor) as valor, operacao from lancamentos\n"
-                  + "inner join contas\n"
-                  + "on lancamentos.id_conta=contas.id\n"
-                  + "inner join categorias\n"
-                  + "on lancamentos.id_categoria=categorias.id\n"
-                  + "inner join usuarios\n"
-                  + "on contas.id_usuario=usuarios.id\n"
-                  + "where usuarios.cpf='"
-                  + cpf
-                  + "' and lancamentos.id_conta="
-                  + conta
-                  + "\n"
-                  + "group by lancamentos.id_categoria;");
-
-      while (rs.next()) {
-        Lancamento aux =
-            new Lancamento(
-                rs.getInt("id"),
-                "",
-                rs.getString("categorias"),
-                rs.getDouble("valor"),
-                rs.getString("operacao"),
-                "",
-                "");
-        retorno.add(aux);
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "select lancamentos.id,categorias.descricao as categorias, sum(valor) as valor, operacao from lancamentos "
+                + "inner join contas on lancamentos.id_conta=contas.id "
+                + "inner join categorias on lancamentos.id_categoria=categorias.id "
+                + "inner join usuarios on contas.id_usuario=usuarios.id "
+                + "where usuarios.cpf=? and lancamentos.id_conta=? "
+                + "group by lancamentos.id_categoria;")) {
+      preparedStatement.setString(1, cpf);
+      preparedStatement.setInt(2, conta);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        while (resultSet.next()) {
+          retorno.add(
+              new Lancamento(
+                  resultSet.getInt("id"),
+                  "",
+                  resultSet.getString("categorias"),
+                  resultSet.getDouble("valor"),
+                  resultSet.getString("operacao"),
+                  "",
+                  ""));
+        }
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return retorno;
   }
@@ -186,42 +176,34 @@ public class LancamentosDAO {
 
     ArrayList<Lancamento> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery(
-              "select lancamentos.id,categorias.descricao as categorias, sum(valor) as valor, operacao from lancamentos\n"
-                  + "inner join contas\n"
-                  + "on lancamentos.id_conta=contas.id\n"
-                  + "inner join categorias\n"
-                  + "on lancamentos.id_categoria=categorias.id\n"
-                  + "inner join usuarios\n"
-                  + "on contas.id_usuario=usuarios.id\n"
-                  + "where usuarios.cpf='"
-                  + cpf
-                  + "' and lancamentos.id_conta="
-                  + conta
-                  + " and YEAR(lancamentos.data)=YEAR('"
-                  + data
-                  + "') and MONTH(lancamentos.data)=Month('"
-                  + data
-                  + "')\n"
-                  + "group by lancamentos.id_categoria;");
-
-      while (rs.next()) {
-        Lancamento aux =
-            new Lancamento(
-                rs.getInt("id"),
-                "",
-                rs.getString("categorias"),
-                rs.getDouble("valor"),
-                rs.getString("operacao"),
-                "",
-                "");
-        retorno.add(aux);
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "select lancamentos.id,categorias.descricao as categorias, sum(valor) as valor, operacao from lancamentos "
+                + "inner join contas on lancamentos.id_conta=contas.id "
+                + "inner join categorias on lancamentos.id_categoria=categorias.id "
+                + "inner join usuarios on contas.id_usuario=usuarios.id "
+                + "where usuarios.cpf=? and lancamentos.id_conta=? "
+                + "and YEAR(lancamentos.data)=YEAR(?) and MONTH(lancamentos.data)=Month(?) "
+                + "group by lancamentos.id_categoria;")) {
+      preparedStatement.setString(1, cpf);
+      preparedStatement.setInt(2, conta);
+      preparedStatement.setString(3, data);
+      preparedStatement.setString(4, data);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        while (resultSet.next()) {
+          retorno.add(
+              new Lancamento(
+                  resultSet.getInt("id"),
+                  "",
+                  resultSet.getString("categorias"),
+                  resultSet.getDouble("valor"),
+                  resultSet.getString("operacao"),
+                  "",
+                  ""));
+        }
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return retorno;
   }
@@ -229,103 +211,82 @@ public class LancamentosDAO {
   // exclui os lançamentos vinculados a uma conta dada. (usado ao excluir uma conta)
   public boolean excluiPorIdConta(int id) {
 
-    try {
-      Statement stmt = conexao.createStatement();
-      Statement stmt2 = conexao.createStatement();
-      ResultSet rs = stmt.executeQuery("select id from lancamentos where id_conta=" + id + ";");
-      while (rs.next()) {
-        stmt2.executeUpdate("delete from lancamentos where id=" + rs.getInt("id") + ";");
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("select id from lancamentos where id_conta=?;")) {
+      preparedStatement.setInt(1, id);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        while (resultSet.next()) {
+          try (PreparedStatement secondStatement =
+              conexao.prepareStatement("delete from lancamentos where id=?;")) {
+            preparedStatement.setInt(1, resultSet.getInt("id"));
+            preparedStatement.executeUpdate();
+          }
+        }
+        return true;
       }
-      return true;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return false;
   }
 
   public boolean exclui(int id) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      stmt.executeUpdate("delete from lancamentos where id=" + id + ";");
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("delete from lancamentos where id=?;")) {
+      preparedStatement.setInt(1, id);
+      preparedStatement.executeUpdate();
       return true;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return false;
   }
 
   public boolean edita(Lancamento lancamento) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      if (lancamento.getId() > 0) {
-        ContasDAO coDAO = new ContasDAO();
-        int id_conta = coDAO.idPorNome(lancamento.getNome_conta());
-        CategoriasDAO caDAO = new CategoriasDAO();
-        int id_categoria = caDAO.getId(lancamento.getCategoria());
-        if (id_conta == 0 || id_categoria == 0) {
-          return false;
-        }
-        stmt.executeUpdate(
-            "update lancamentos set id_conta="
-                + id_conta
-                + ",id_categoria="
-                + id_categoria
-                + ",valor="
-                + lancamento.getValor()
-                + ",operacao='"
-                + lancamento.getOperacao()
-                + "',data='"
-                + lancamento.getData()
-                + "',descricao='"
-                + lancamento.getDescricao()
-                + "' where id="
-                + lancamento.getId()
-                + ";");
-        return true;
-      }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    if (lancamento.getId() <= 0) return false;
+    int id_conta = contasDAO.idPorNome(lancamento.getNome_conta());
+    if (id_conta <= 0) return false;
+    int id_categoria = categoriasDAO.getId(lancamento.getCategoria());
+    if (id_categoria <= 0) return false;
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "update lancamentos set id_conta=? ,id_categoria=? ,valor=? ,operacao=? "
+                + ",data=? ,descricao=? where id=?;")) {
+      preparedStatement.setInt(1, id_conta);
+      preparedStatement.setInt(2, id_categoria);
+      preparedStatement.setDouble(3, lancamento.getValor());
+      preparedStatement.setString(4, lancamento.getOperacao());
+      preparedStatement.setString(5, lancamento.getData());
+      preparedStatement.setString(6, lancamento.getDescricao());
+      preparedStatement.setInt(7, lancamento.getId());
+      preparedStatement.executeUpdate();
+      return true;
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return false;
   }
 
   public boolean insere(Lancamento lancamento) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      if (lancamento.getId() == 0) {
-        ContasDAO coDAO = new ContasDAO();
-        int id_conta = coDAO.idPorNome(lancamento.getNome_conta());
-        CategoriasDAO caDAO = new CategoriasDAO();
-        int id_categoria = caDAO.getId(lancamento.getCategoria());
-        if (id_conta == 0 || id_categoria == 0) {
-          return false;
-        }
-        stmt.executeUpdate(
-            "insert into lancamentos (id_conta,id_categoria,valor,operacao,data,descricao) values ("
-                + id_conta
-                + ","
-                + id_categoria
-                + ","
-                + lancamento.getValor()
-                + ",'"
-                + lancamento.getOperacao()
-                + "','"
-                + lancamento.getData()
-                + "','"
-                + lancamento.getDescricao()
-                + "');");
-        return true;
-      }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    if (lancamento.getId() != 0) return false;
+    int id_conta = contasDAO.idPorNome(lancamento.getNome_conta());
+    if (id_conta <= 0) return false;
+    int id_categoria = categoriasDAO.getId(lancamento.getCategoria());
+    if (id_categoria <= 0) return false;
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "insert into lancamentos (id_conta,id_categoria,valor,operacao,data,descricao) "
+                + "values (?,?,?,?,?,?);")) {
+      preparedStatement.setInt(1, id_conta);
+      preparedStatement.setInt(2, id_categoria);
+      preparedStatement.setDouble(3, lancamento.getValor());
+      preparedStatement.setString(4, lancamento.getOperacao());
+      preparedStatement.setString(5, lancamento.getData());
+      preparedStatement.setString(6, lancamento.getDescricao());
+      return true;
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return false;
   }
 }

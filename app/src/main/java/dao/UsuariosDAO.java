@@ -1,190 +1,173 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import lombok.extern.slf4j.Slf4j;
 import model.Conta;
 import model.Usuario;
 
+@Slf4j
 public class UsuariosDAO {
 
   private Connection conexao;
+  private ContasDAO contasDAO;
 
   public UsuariosDAO() {
     try {
       conexao = Conexao.criaConexao();
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception e) {
+      log.error(e.getMessage());
     }
+    this.contasDAO = new ContasDAO();
+  }
+
+  public UsuariosDAO(ContasDAO contasDAO) {
+    try {
+      conexao = Conexao.criaConexao();
+    } catch (Exception e) {
+      log.error(e.getMessage());
+    }
+    this.contasDAO = contasDAO;
   }
 
   // retorna todos os usuarios cadastrados no BD
   public ArrayList<Usuario> getLista() {
-
     ArrayList<Usuario> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs = stmt.executeQuery("select * from usuarios;");
-
-      while (rs.next()) {
-        Usuario aux =
+    try (PreparedStatement preparedStatement = conexao.prepareStatement("select * from usuarios;");
+        ResultSet resultSet = preparedStatement.executeQuery()) {
+      while (resultSet.next()) {
+        retorno.add(
             new Usuario(
-                rs.getInt("id"),
-                rs.getString("nome"),
-                rs.getString("cpf"),
-                rs.getString("senha"),
-                rs.getString("suspenso"));
-        retorno.add(aux);
+                resultSet.getInt("id"),
+                resultSet.getString("nome"),
+                resultSet.getString("cpf"),
+                resultSet.getString("senha"),
+                resultSet.getString("suspenso")));
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return retorno;
   }
 
-  // retorna o usuario de cpf dado
+  // retorna o usuario de cpf dado ou null
   public Usuario getUsuario(String cpf) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs = stmt.executeQuery("select * from usuarios where cpf='" + cpf + "';");
-      if (rs.next()) {
-        Usuario aux =
-            new Usuario(
-                rs.getInt("id"),
-                rs.getString("nome"),
-                rs.getString("cpf"),
-                rs.getString("senha"),
-                rs.getString("suspenso"));
-        return aux;
-      } else {
-        rs = stmt.executeQuery("select * from administradores where cpf='" + cpf + "';");
-        if (rs.next()) {
-          Usuario aux =
-              new Usuario(
-                  rs.getInt("id"),
-                  rs.getString("nome"),
-                  rs.getString("cpf"),
-                  rs.getString("senha"),
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("select * from usuarios where cpf=?;")) {
+      preparedStatement.setString(1, cpf);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        if (resultSet.next()) {
+          return new Usuario(
+              resultSet.getInt("id"),
+              resultSet.getString("nome"),
+              resultSet.getString("cpf"),
+              resultSet.getString("senha"),
+              resultSet.getString("suspenso"));
+        } else {
+          try (PreparedStatement secondStatement =
+              conexao.prepareStatement("select * from administradores where cpf=?;")) {
+            if (resultSet.next()) {
+              return new Usuario(
+                  resultSet.getInt("id"),
+                  resultSet.getString("nome"),
+                  resultSet.getString("cpf"),
+                  resultSet.getString("senha"),
                   "A");
-          return aux;
+            }
+          }
         }
       }
-
-    } catch (SQLException ex) {
-      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return null;
   }
 
   // checa se o cpf e senha dados batem com os de um usuario cadastrado no BD
   public boolean valida(String cpf, String senha) {
-    Statement stmt;
-    try {
-      stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery("select cpf, senha, suspenso from usuarios where cpf='" + cpf + "';");
-      if (rs.next()) {
-        if (cpf.equals(rs.getString("cpf"))
-            && senha.equals(rs.getString("senha"))
-            && rs.getString("suspenso").equals("N")) return true;
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("select cpf, senha, suspenso from usuarios where cpf=?;")) {
+      preparedStatement.setString(1, cpf);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        if (resultSet.next()) {
+          if (cpf.equals(resultSet.getString("cpf"))
+              && senha.equals(resultSet.getString("senha"))
+              && resultSet.getString("suspenso").equals("N")) return true;
+        }
       }
-    } catch (SQLException ex) {
-      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
-
     return false;
   }
 
   public boolean insere(Usuario usuario) {
-
-    try {
-      if (getUsuario(usuario.getCpf()) == null) { // checa se o cpf ja existe
-        Statement stmt = conexao.createStatement();
-        stmt.executeUpdate(
-            "insert into usuarios (nome,cpf,senha,suspenso)values ('"
-                + usuario.getNome()
-                + "','"
-                + usuario.getCpf()
-                + "','"
-                + usuario.getSenha()
-                + "','"
-                + usuario.getSuspenso()
-                + "');");
-        return true;
-      } else return false;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    if (getUsuario(usuario.getCpf()) != null) return false; // checa se o cpf ja existe
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "insert into usuarios (nome,cpf,senha,suspenso) " + "values (?,?,?,?);")) {
+      preparedStatement.setString(1, usuario.getNome());
+      preparedStatement.setString(2, usuario.getCpf());
+      preparedStatement.setString(3, usuario.getSenha());
+      preparedStatement.setString(4, usuario.getSuspenso());
+      preparedStatement.executeUpdate();
+      return true;
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return false;
   }
 
   // para excluir um usuario eu preciso excluir antes tudo que esta vinculado a ele
   public boolean exclui(String cpf) {
-
-    try {
-      ContasDAO DAO = new ContasDAO();
-      ArrayList<Conta> contas = DAO.getLista(cpf);
-      for (Conta aux : contas) { // excluindo todas as contas vinculadas
-        DAO.exclui(
-            aux.getConta_corrente()); // cada conta ja exclui todos os lancamentos vinculados a ela
-        // antes
-      }
-      Statement stmt = conexao.createStatement();
-      stmt.executeUpdate("delete from usuarios where id='" + getUsuario(cpf).getId() + "';");
+    // excluindo todas as contas, e cada conta ja exclui todos os lancamentos vinculados a ela
+    ArrayList<Conta> contas = contasDAO.getLista(cpf);
+    for (Conta conta : contas) {
+      contasDAO.exclui(conta.getConta_corrente());
+    }
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("delete from usuarios where id=?;")) {
+      preparedStatement.setInt(1, getUsuario(cpf).getId());
+      preparedStatement.executeUpdate();
       return true;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return false;
   }
 
   public boolean edita(Usuario usuario, int id) {
-
-    try {
-      Statement stmt = conexao.createStatement();
-      stmt.executeUpdate(
-          "update usuarios set nome='"
-              + usuario.getNome()
-              + "',cpf='"
-              + usuario.getCpf()
-              + "',senha='"
-              + usuario.getSenha()
-              + "',Suspenso='"
-              + usuario.getSuspenso()
-              + "' where id='"
-              + id
-              + "';");
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement(
+            "update usuarios set nome=? ,cpf=? ,senha=? ,suspenso=? where id=?;")) {
+      preparedStatement.setString(1, usuario.getNome());
+      preparedStatement.setString(2, usuario.getCpf());
+      preparedStatement.setString(3, usuario.getSenha());
+      preparedStatement.setString(4, usuario.getSuspenso());
+      preparedStatement.setInt(5, id);
+      preparedStatement.executeUpdate();
       return true;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return false;
   }
 
   public boolean suspende(String cpf) {
-
-    Usuario aux = getUsuario(cpf);
-    String suspenso;
-    if (aux.getSuspenso().equals("S")) {
-      suspenso = "N";
-    } else {
-      suspenso = "S";
-    }
-    try {
-      Statement stmt = conexao.createStatement();
-      stmt.executeUpdate(
-          "update usuarios set suspenso='" + suspenso + "' where id='" + aux.getId() + "';");
+    Usuario usuario = getUsuario(cpf);
+    String suspenso = usuario.getSuspenso().equals("S") ? "N" : "S";
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("update usuarios set suspenso=? where id=?;")) {
+      preparedStatement.setString(1, suspenso);
+      preparedStatement.setInt(2, usuario.getId());
+      preparedStatement.executeUpdate();
       return true;
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (SQLException e) {
+      log.error(e.getMessage());
     }
     return false;
   }

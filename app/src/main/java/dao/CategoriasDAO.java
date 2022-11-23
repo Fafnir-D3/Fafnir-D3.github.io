@@ -1,9 +1,9 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,20 +19,20 @@ public class CategoriasDAO {
   public CategoriasDAO() {
     try {
       conexao = Conexao.criaConexao();
-    } catch (SQLException ex) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
   public int getId(String descricao) {
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs =
-          stmt.executeQuery("SELECT id FROM categorias where descricao='" + descricao + "';");
-
-      if (rs.next()) {
-        return (rs.getInt("id"));
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("SELECT id FROM categorias where descricao=?;")) {
+      preparedStatement.setString(1, descricao);
+      try (ResultSet resultSet = preparedStatement.executeQuery()) {
+        if (resultSet.next()) {
+          return (resultSet.getInt("id"));
+        }
       }
     } catch (SQLException ex) {
       Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -45,12 +45,11 @@ public class CategoriasDAO {
 
     ArrayList<String> retorno = new ArrayList<>();
 
-    try {
-      Statement stmt = conexao.createStatement();
-      ResultSet rs = stmt.executeQuery("SELECT descricao FROM categorias;");
-
-      while (rs.next()) {
-        String aux = rs.getString("descricao");
+    try (PreparedStatement preparedStatement =
+            conexao.prepareStatement("SELECT descricao FROM categorias;");
+        ResultSet resultSet = preparedStatement.executeQuery()) {
+      while (resultSet.next()) {
+        String aux = resultSet.getString("descricao");
         retorno.add(aux);
       }
     } catch (SQLException ex) {
@@ -61,9 +60,10 @@ public class CategoriasDAO {
   }
 
   public boolean insere(String descricao) {
-    try {
-      Statement stmt = conexao.createStatement();
-      stmt.executeUpdate("insert into categorias (descricao) values ('" + descricao + "');");
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("insert into categorias (descricao) values (?);")) {
+      preparedStatement.setString(1, descricao);
+      preparedStatement.executeUpdate();
       return true;
     } catch (SQLException ex) {
       Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
@@ -72,17 +72,12 @@ public class CategoriasDAO {
   }
 
   public boolean edita(String descricao, String antigo) {
-    try {
-      Statement stmt = conexao.createStatement();
-      if (getId(antigo) > 0) {
-        stmt.executeUpdate(
-            "update categorias set descricao='"
-                + descricao
-                + "' where id='"
-                + getId(antigo)
-                + "';");
-        return true;
-      }
+    if (getId(antigo) <= 0) return false;
+    try (PreparedStatement preparedStatement =
+        conexao.prepareStatement("update categorias set descricao=? where id=?;")) {
+      preparedStatement.setString(1, descricao);
+      preparedStatement.setString(2, antigo);
+      return true;
     } catch (SQLException ex) {
       Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);
     }
@@ -94,35 +89,46 @@ public class CategoriasDAO {
   // que a categoria que será excluida não tiver mais nenhum lançamento vinculado
   // eu posso excluir ela do BD
   public boolean exclui(String antigo) {
-    try {
-      Statement stmt = conexao.createStatement();
-      Statement stmt2 = conexao.createStatement();
-      int idAntigo = getId(antigo);
-      int idNovo = 0;
-      if (idAntigo > 0) {
-        ResultSet rs =
-            stmt.executeQuery(
+    int idAntigo = getId(antigo);
+    if (idAntigo <= 0) return false;
+    try (PreparedStatement preparedStatement =
+            conexao.prepareStatement(
                 "SELECT EXISTS(SELECT id FROM categorias where descricao='Sem Categoria') as existe;");
-        if (rs.next()) {
-          if (rs.getInt("existe") == 0) {
-            stmt.executeUpdate("insert into categorias (descricao) values ('Sem Categoria');");
+        ResultSet resultSet = preparedStatement.executeQuery(); ) {
+      int idNovo = 0;
+      if (resultSet.next() && resultSet.getInt("existe") == 0) {
+        try (PreparedStatement segundoStatement =
+            conexao.prepareStatement(
+                "insert into categorias (descricao) values ('Sem Categoria');")) {
+          segundoStatement.executeUpdate();
+        }
+      }
+      try (PreparedStatement terceiroStatement =
+              conexao.prepareStatement(
+                  "SELECT id FROM categorias where descricao='Sem Categoria'");
+          ResultSet segundoResult = terceiroStatement.executeQuery()) {
+        if (segundoResult.next()) {
+          idNovo = segundoResult.getInt("id");
+        }
+        try (PreparedStatement quartoStatement =
+            conexao.prepareStatement("select id from lancamentos where id_categoria=?;")) {
+          quartoStatement.setInt(1, idAntigo);
+          try (ResultSet terceiroResult = quartoStatement.executeQuery();
+              PreparedStatement quintoStatement =
+                  conexao.prepareStatement("update lancamentos set id_categoria=? where id=?;")) {
+            while (terceiroResult.next()) {
+              quintoStatement.setInt(1, idNovo);
+              quintoStatement.setInt(2, terceiroResult.getInt("id"));
+              quintoStatement.executeUpdate();
+            }
           }
         }
-        rs = stmt.executeQuery("SELECT id FROM categorias where descricao='Sem Categoria'");
-        if (rs.next()) {
-          idNovo = rs.getInt("id");
+        try (PreparedStatement sextoStatement =
+            conexao.prepareStatement("delete from categorias where id=?;")) {
+          sextoStatement.setInt(1, idAntigo);
+          sextoStatement.executeUpdate();
+          return true;
         }
-        rs = stmt.executeQuery("select id from lancamentos where id_categoria=" + idAntigo + ";");
-        while (rs.next()) {
-          stmt2.executeUpdate(
-              "update lancamentos set id_categoria="
-                  + idNovo
-                  + " where id='"
-                  + rs.getInt("id")
-                  + "';");
-        }
-        stmt.executeUpdate("delete from categorias where id='" + idAntigo + "';");
-        return true;
       }
     } catch (SQLException ex) {
       Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, ex);

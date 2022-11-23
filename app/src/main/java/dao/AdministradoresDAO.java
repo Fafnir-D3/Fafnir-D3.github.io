@@ -5,10 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import lombok.extern.slf4j.Slf4j;
 import model.Usuario;
 
+@Slf4j
 public class AdministradoresDAO {
 
   private Connection conexao;
@@ -16,8 +16,8 @@ public class AdministradoresDAO {
   public AdministradoresDAO() {
     try {
       conexao = Conexao.criaConexao();
-    } catch (SQLException e) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
+    } catch (Exception e) {
+      log.error(e.getMessage());
     }
   }
 
@@ -37,7 +37,7 @@ public class AdministradoresDAO {
                 "A"));
       }
     } catch (SQLException e) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
+      log.error(e.getMessage());
     }
     return retorno;
   }
@@ -58,7 +58,7 @@ public class AdministradoresDAO {
             : null;
       }
     } catch (SQLException e) {
-      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, e);
+      log.error(e.getMessage());
     }
     return null;
   }
@@ -74,7 +74,7 @@ public class AdministradoresDAO {
         }
       }
     } catch (SQLException e) {
-      Logger.getLogger(UsuariosDAO.class.getName()).log(Level.SEVERE, null, e);
+      log.error(e.getMessage());
     }
 
     return false;
@@ -87,7 +87,7 @@ public class AdministradoresDAO {
       preparedStatement.executeUpdate();
       return true;
     } catch (SQLException e) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
+      log.error(e.getMessage());
     }
     return false;
   }
@@ -105,7 +105,7 @@ public class AdministradoresDAO {
         return true;
       } else return false;
     } catch (SQLException e) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
+      log.error(e.getMessage());
     }
     return false;
   }
@@ -124,7 +124,7 @@ public class AdministradoresDAO {
         return true;
       }
     } catch (SQLException e) {
-      Logger.getLogger(ContasDAO.class.getName()).log(Level.SEVERE, null, e);
+      log.error(e.getMessage());
     }
     return false;
   }

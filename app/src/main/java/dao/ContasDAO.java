@@ -20,7 +20,7 @@ public class ContasDAO {
     } catch (Exception e) {
       log.error(e.getMessage());
     }
-    lancamentosDAO = new LancamentosDAO();
+    lancamentosDAO = new LancamentosDAO(this, new CategoriasDAO());
   }
 
   public ContasDAO(LancamentosDAO lancamentosDAO) {

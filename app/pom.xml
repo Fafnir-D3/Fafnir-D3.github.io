@@ -33,7 +33,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
+            <artifactId>mockito-inline</artifactId>
             <version>3.6.0</version>
             <scope>test</scope>
         </dependency>
@@ -103,10 +103,24 @@
                 </executions>
             </plugin>
             <!-- ToDo: Enable Plugin -->
-<!--            <plugin>-->
-<!--                <groupId>org.jacoco</groupId>-->
-<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Exclude everything we're not testing -->
+                    <excludes>
+                        <exclude>**/controller/E*</exclude>
+                        <exclude>**/controller/F*</exclude>
+                        <exclude>**/controller/I*</exclude>
+                        <exclude>**/controller/M*</exclude>
+                        <exclude>**/controller/S*</exclude>
+                        <exclude>**/dao/A*</exclude>
+                        <exclude>**/dao/C*</exclude>
+                        <exclude>**/dao/L*</exclude>
+                        <exclude>**/model/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <reporting>
@@ -114,6 +128,20 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <!-- Exclude everything we're not testing -->
+                    <excludes>
+                        <exclude>**/controller/E*</exclude>
+                        <exclude>**/controller/F*</exclude>
+                        <exclude>**/controller/I*</exclude>
+                        <exclude>**/controller/M*</exclude>
+                        <exclude>**/controller/S*</exclude>
+                        <exclude>**/dao/A*</exclude>
+                        <exclude>**/dao/C*</exclude>
+                        <exclude>**/dao/L*</exclude>
+                        <exclude>**/model/**</exclude>
+                    </excludes>
+                </configuration>
                 <reportSets>
                     <reportSet>
                         <reports>

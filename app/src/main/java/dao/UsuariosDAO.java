@@ -70,13 +70,16 @@ public class UsuariosDAO {
         } else {
           try (PreparedStatement secondStatement =
               conexao.prepareStatement("select * from administradores where cpf=?;")) {
-            if (resultSet.next()) {
-              return new Usuario(
-                  resultSet.getInt("id"),
-                  resultSet.getString("nome"),
-                  resultSet.getString("cpf"),
-                  resultSet.getString("senha"),
-                  "A");
+            secondStatement.setString(1, cpf);
+            try (ResultSet secondResult = secondStatement.executeQuery()) {
+              if (secondResult.next()) {
+                return new Usuario(
+                    secondResult.getInt("id"),
+                    secondResult.getString("nome"),
+                    secondResult.getString("cpf"),
+                    secondResult.getString("senha"),
+                    "A");
+              }
             }
           }
         }
@@ -94,8 +97,7 @@ public class UsuariosDAO {
       preparedStatement.setString(1, cpf);
       try (ResultSet resultSet = preparedStatement.executeQuery()) {
         if (resultSet.next()) {
-          if (cpf.equals(resultSet.getString("cpf"))
-              && senha.equals(resultSet.getString("senha"))
+          if (senha.equals(resultSet.getString("senha"))
               && resultSet.getString("suspenso").equals("N")) return true;
         }
       }
@@ -142,13 +144,11 @@ public class UsuariosDAO {
 
   public boolean edita(Usuario usuario, int id) {
     try (PreparedStatement preparedStatement =
-        conexao.prepareStatement(
-            "update usuarios set nome=? ,cpf=? ,senha=? ,suspenso=? where id=?;")) {
+        conexao.prepareStatement("update usuarios set nome=? ,senha=? ,suspenso=? where id=?;")) {
       preparedStatement.setString(1, usuario.getNome());
-      preparedStatement.setString(2, usuario.getCpf());
-      preparedStatement.setString(3, usuario.getSenha());
-      preparedStatement.setString(4, usuario.getSuspenso());
-      preparedStatement.setInt(5, id);
+      preparedStatement.setString(2, usuario.getSenha());
+      preparedStatement.setString(3, usuario.getSuspenso());
+      preparedStatement.setInt(4, id);
       preparedStatement.executeUpdate();
       return true;
     } catch (SQLException e) {

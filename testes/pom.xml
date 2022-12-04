@@ -28,6 +28,7 @@
             <artifactId>selenium-firefox-driver</artifactId>
             <version>${selenium.version}</version>
         </dependency>
+        <!-- IDK if I need this -->
 <!--        <dependency>-->
 <!--            <groupId>org.testng</groupId>-->
 <!--            <artifactId>testng</artifactId>-->
@@ -42,6 +43,7 @@
         </dependency>
     </dependencies>
 
+    <!-- ToDo: Enable Plugins -->
     <build>
         <plugins>
             <plugin>
@@ -54,8 +56,13 @@
                         <version>4.13.2</version>
                     </dependency>
                 </dependencies>
+                <!-- I've disabled Selenium and JMeter tests while the heroku host is down -->
+                <configuration>
+                    <excludes>
+                        <exclude>**/*Test*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
-            <!-- ToDo: Enable Plugin -->
 <!--            <plugin>-->
 <!--                <groupId>com.lazerycode.jmeter</groupId>-->
 <!--                <artifactId>jmeter-maven-plugin</artifactId>-->

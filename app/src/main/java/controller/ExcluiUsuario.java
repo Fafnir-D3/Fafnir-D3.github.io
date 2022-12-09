@@ -2,14 +2,17 @@ package controller;
 
 import dao.UsuariosDAO;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import model.Usuario;
 
+@Slf4j
 @WebServlet(
     name = "ExcluiUsuario",
     urlPatterns = {"/ExcluiUsuario"})
@@ -26,7 +29,11 @@ public class ExcluiUsuario extends HttpServlet {
 
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario.getSuspenso().equals("A")) { // admin
-          DAO.exclui((String) request.getParameter("cpf"));
+          try {
+            DAO.exclui(request.getParameter("cpf"));
+          } catch (SQLException e) {
+            log.error(e.getMessage());
+          }
           response.sendRedirect("MostrarCadastro");
         } else {
           response.sendRedirect("Erro.jsp");

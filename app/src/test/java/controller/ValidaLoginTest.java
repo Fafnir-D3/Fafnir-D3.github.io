@@ -1,5 +1,6 @@
 package controller;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -8,6 +9,7 @@ import static org.mockito.Mockito.when;
 import dao.AdministradoresDAO;
 import dao.UsuariosDAO;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -41,7 +43,7 @@ public class ValidaLoginTest {
 
   @Test
   public void testDoPost_quandoUsuarioValido_entaoRetornaUsuario()
-      throws ServletException, IOException {
+      throws ServletException, IOException, SQLException {
     // Arrange
     UsuariosDAO usuariosDAO = mock(UsuariosDAO.class);
     AdministradoresDAO adminDAO = mock(AdministradoresDAO.class);
@@ -67,7 +69,8 @@ public class ValidaLoginTest {
   }
 
   @Test
-  public void testDoPost_quandoUsuarioSuspenso_entaoErro() throws ServletException, IOException {
+  public void testDoPost_quandoUsuarioSuspenso_entaoErro()
+      throws ServletException, IOException, SQLException {
     // Arrange
     UsuariosDAO usuariosDAO = mock(UsuariosDAO.class);
     AdministradoresDAO adminDAO = mock(AdministradoresDAO.class);
@@ -92,7 +95,7 @@ public class ValidaLoginTest {
 
   @Test
   public void testDoPost_quandoAdministradorValido_entaoRetornaAdministrador()
-      throws ServletException, IOException {
+      throws ServletException, IOException, SQLException {
     // Arrange
     UsuariosDAO usuariosDAO = mock(UsuariosDAO.class);
     AdministradoresDAO adminDAO = mock(AdministradoresDAO.class);
@@ -119,7 +122,8 @@ public class ValidaLoginTest {
   }
 
   @Test
-  public void testDoPost_quandoInvalido_entaoErro() throws ServletException, IOException {
+  public void testDoPost_quandoInvalido_entaoErro()
+      throws ServletException, IOException, SQLException {
     // Arrange
     UsuariosDAO usuariosDAO = mock(UsuariosDAO.class);
     AdministradoresDAO adminDAO = mock(AdministradoresDAO.class);
@@ -139,5 +143,20 @@ public class ValidaLoginTest {
 
     // Assert
     verify(response).sendRedirect("Erro.jsp");
+  }
+
+  @Test
+  public void testDoGet_quandoException_entaoLoga()
+      throws SQLException, ServletException, IOException {
+    UsuariosDAO usuariosDAO = mock(UsuariosDAO.class);
+    HttpServletResponse response = mock(HttpServletResponse.class);
+    HttpServletRequest request = mock(HttpServletRequest.class);
+    controlador = new ValidaLogin(usuariosDAO, null);
+
+    when(request.getParameter("cpf")).thenReturn("123.456.789-00");
+    when(request.getParameter("senha")).thenReturn("123");
+    when(usuariosDAO.valida("123.456.789-00", "123")).thenThrow(new SQLException());
+
+    assertDoesNotThrow(() -> controlador.doPost(request, response));
   }
 }

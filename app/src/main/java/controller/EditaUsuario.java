@@ -2,14 +2,17 @@ package controller;
 
 import dao.UsuariosDAO;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import model.Usuario;
 
+@Slf4j
 @WebServlet(
     name = "EditaUsuario",
     urlPatterns = {"/EditaUsuario"})
@@ -41,7 +44,11 @@ public class EditaUsuario extends HttpServlet {
                   (String) request.getParameter("cpf"),
                   (String) request.getParameter("senha"),
                   (String) request.getParameter("suspenso"));
-          DAO.edita(aux, id);
+          try {
+            DAO.edita(aux, id);
+          } catch (SQLException e) {
+            log.error(e.getMessage());
+          }
           response.sendRedirect("MostrarCadastro");
         } else {
           response.sendRedirect("Erro.jsp");

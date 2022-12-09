@@ -2,14 +2,17 @@ package controller;
 
 import dao.UsuariosDAO;
 import java.io.IOException;
+import java.sql.SQLException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import model.Usuario;
 
+@Slf4j
 @WebServlet(
     name = "InserirUsuario",
     urlPatterns = {"/InserirUsuario"})
@@ -42,7 +45,11 @@ public class InserirUsuario extends HttpServlet {
                   (String) request.getParameter("cpf"),
                   (String) request.getParameter("senha"),
                   (String) request.getParameter("suspenso"));
-          DAO.insere(aux);
+          try {
+            DAO.insere(aux);
+          } catch (SQLException e) {
+            log.error(e.getMessage());
+          }
           // MostrarCadatro nesse caso me redireciona para Usuarios.jsp
           response.sendRedirect("MostrarCadastro");
         } else {

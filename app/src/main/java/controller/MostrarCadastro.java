@@ -2,6 +2,7 @@ package controller;
 
 import dao.UsuariosDAO;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -10,12 +11,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import model.Usuario;
 
 /*  Ideia:
     MostrarCadastro é usada para 2 situações, redirecionar para a pagina Usuarios.jsp
 para os administradores, e MeuCadastro.jsp para os usuarios comuns.
 */
+@Slf4j
 @WebServlet(
     name = "MostrarCadastro",
     urlPatterns = {"/MostrarCadastro"})
@@ -33,7 +36,12 @@ public class MostrarCadastro extends HttpServlet {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         if (usuario.getSuspenso().equals("A")) { // admin
 
-          ArrayList<Usuario> usuarios = DAO.getLista();
+          ArrayList<Usuario> usuarios = null;
+          try {
+            usuarios = DAO.getLista();
+          } catch (SQLException e) {
+            log.error(e.getMessage());
+          }
           request.setAttribute("usuarios", usuarios);
           RequestDispatcher rd = request.getRequestDispatcher("Usuarios.jsp");
           rd.forward(request, response);

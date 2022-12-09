@@ -125,13 +125,13 @@
                                             <limit>
                                                 <counter>INSTRUCTION</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.80</minimum>
+                                                <minimum>0.90</minimum>
                                             </limit>
                                             <limit>
                                                 <!-- I'd really like to get 100 here, but since I'm using a lot of try/catch/resources its more of a pain -->
                                                 <counter>BRANCH</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.50</minimum>
+                                                <minimum>0.90</minimum>
                                             </limit>
                                         </limits>
                                     </rule>

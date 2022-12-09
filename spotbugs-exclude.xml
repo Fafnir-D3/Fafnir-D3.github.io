@@ -6,4 +6,11 @@
     <Match>
         <Bug pattern="SLF4J_LOGGER_SHOULD_BE_NON_STATIC" />
     </Match>
+    <!-- Garbage collector and hurts coverage-->
+    <Match>
+        <Bug pattern="ODR_OPEN_DATABASE_RESOURCE"/>
+    </Match>
+    <Match>
+        <Bug pattern="OBL_UNSATISFIED_OBLIGATION"/>
+    </Match>
 </FindBugsFilter>

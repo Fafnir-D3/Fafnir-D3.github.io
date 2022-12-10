@@ -18,11 +18,11 @@ import model.Usuario;
     urlPatterns = {"/MostrarContas"})
 public class MostrarContas extends HttpServlet {
 
-  @Override
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
+
+  protected void doGet(HttpServletRequest request, HttpServletResponse response, ContasDAO DaoAccount)
       throws ServletException, IOException {
     request.setCharacterEncoding("UTF-8");
-    ContasDAO DAO = new ContasDAO();
+    ContasDAO DAO = DaoAccount;
     HttpSession session = request.getSession();
     if (session != null) { // checa login
       if (session.getAttribute("usuario") != null) {
